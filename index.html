@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Classical Music Word Search</title>
+    <style>
+        :root {
+            --primary-color: #4a148c;
+            --secondary-color: #7b1fa2;
+            --bg-color: #f3e5f5;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            margin-top: 0;
+            font-weight: 400;
+        }
+
+        .level-select {
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 0 10px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        button.active {
+            background-color: #00e676;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .game-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            justify-content: center;
+            max-width: 1000px;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .grid-container {
+            user-select: none;
+        }
+
+        .grid {
+            display: grid;
+            gap: 2px;
+            background-color: #ccc;
+            border: 4px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 2px;
+        }
+
+        .cell {
+            width: 35px;
+            height: 35px;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+
+        .cell.selected {
+            background-color: #ffeb3b;
+        }
+
+        .cell.found {
+            background-color: #a5d6a7;
+            color: #1b5e20;
+        }
+
+        .word-list-container {
+            min-width: 250px;
+        }
+
+        .word-list-container h3 {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 5px;
+            color: var(--primary-color);
+        }
+
+        .word-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .word-item {
+            font-size: 18px;
+            padding: 5px;
+            font-weight: 500;
+        }
+
+        .word-item.found {
+            text-decoration: line-through;
+            color: #888;
+            font-style: italic;
+        }
+
+        .win-message {
+            display: none;
+            color: #2e7d32;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: center;
+            animation: pop 0.5s ease;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.8); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <h1 id="game-title">RAAG</h1>
+    <h2 id="game-subtitle">Can you find all the Raagas of Praveshika Pratham Level?</h2>
+
+    <div class="level-select">
+        <button id="btn-raag" class="active" onclick="switchLevel('raag')">Level 1: RAAG</button>
+        <button id="btn-taal" onclick="switchLevel('taal')">Level 2: TAAL</button>
+    </div>
+
+    <div class="game-container">
+        <div class="grid-container">
+            <div id="grid" class="grid"></div>
+        </div>
+
+        <div class="word-list-container">
+            <h3>Words to Find</h3>
+            <ul id="word-list" class="word-list"></ul>
+        </div>
+    </div>
+
+    <div id="win-message" class="win-message">🎉 Level Complete! Wonderful Job! 🎉</div>
+
+    <script>
+        // Game Data extracted directly from image_ad997a.png
+        const levels = {
+            raag: {
+                title: "RAAG",
+                subtitle: "Can you find all the Raagas of Praveshika Pratham Level?",
+                words: ["DURGA", "BHIMPALASI", "DES", "BAGESHREE", "BHOOP", "KHAMAAJ", "KAAFI", "YAMAN"],
+                size: { rows: 15, cols: 15 },
+                // Hardcoded grid representation from image
+                gridText: [
+                    "SMUSLKFWMSPOOHB",
+                    "LTXYAMYIEDOFEOT",
+                    "SAHAAHJMADBILYF",
+                    "AXFAAVULRSUQIPN",
+                    "VIKUNVABBNRRATJ",
+                    "RCGINKUNACVNGDW",
+                    "JLKSBSSUGAIEEAI",
+                    "JPCATWCGERSERHJ",
+                    "ZVBLKCRFSVAZNOP",
+                    "SPRAINOKHAMAAJK",
+                    "NSGPARSFRFICPPB",
+                    "FRIMAYZSERSNNIN",
+                    "DDAIKYLFELQEGNV",
+                    "TYUHCSIDCSZYDGH",
+                    "CLEBRANCJKNHRIR"
+                ]
+            },
+            taal: {
+                title: "TAAL",
+                subtitle: "Can you find all the Taalas of Praveshika Pratham Level?",
+                words: ["DADRA", "TEENTAAL", "KEHRAVA", "JHAPTAAL", "EKTAAL", "CHAUTAAL"],
+                size: { rows: 15, cols: 15 },
+                // Hardcoded grid representation from image
+                gridText: [
+                    "RMYSCADIINANENZ",
+                    "MSKWSP SHUOLOMLF",
+                    "DADRAQDNAVKGEAL",
+                    "TYMIDOLOXFAEEAY",
+                    "SPREFINPGNLPRTS",
+                    "AAHMDB SYHAALAPJ",
+                    "XAVKSUEPAGKIRAU",
+                    "PANEAMSTRTIAHHO",
+                    "IUVHNRKTEFNABJA",
+                    "YHSRSETGUECVCHI",
+                    "CIKACVRDGNNGAWU",
+                    "LSSVAIJAKEBTEIS",
+                    "VLCAVAZOBZKNAPR",
+                    "LBANKNCIEHRRJAN",
+                    "PLAATUAHCATREJL"
+                ]
+            }
+        };
+
+        let currentLevel = 'raag';
+        let isSelecting = false;
+        let startCell = null;
+        let selectedCells = [];
+        let foundWords = [];
+
+        const gridElement = document.getElementById('grid');
+        const wordListElement = document.getElementById('word-list');
+        const winMessage = document.getElementById('win-message');
+
+        function initGame() {
+            const level = levels[currentLevel];
+            document.getElementById('game-title').innerText = level.title;
+            document.getElementById('game-subtitle').innerText = level.subtitle;
+            winMessage.style.display = 'none';
+            foundWords = [];
+            
+            // Setup Grid layout
+            gridElement.style.gridTemplateColumns = `repeat(${level.size.cols}, 35px)`;
+            gridElement.innerHTML = '';
+
+            // Clean data spaces just in case
+            const cleanGridText = level.gridText.map(row => row.replace(/\s/g, ''));
+
+            // Render Grid
+            for (let r = 0; r < level.size.rows; r++) {
+                for (let c = 0; c < level.size.cols; c++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.innerText = cleanGridText[r][c] || '';
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+
+                    // Mouse / Touch Event Listeners
+                    cell.addEventListener('mousedown', startSelection);
+                    cell.addEventListener('mouseenter', rollSelection);
+                    gridElement.appendChild(cell);
+                }
+            }
+
+            // End selection anywhere on mouse up
+            window.removeEventListener('mouseup', endSelection);
+            window.addEventListener('mouseup', endSelection);
+
+            // Render Word List
+            wordListElement.innerHTML = '';
+            level.words.forEach(word => {
+                const li = document.createElement('li');
+                li.classList.add('word-item');
+                li.innerText = word;
+                li.id = `word-${word}`;
+                wordListElement.appendChild(li);
+            });
+        }
+
+        function startSelection(e) {
+            isSelecting = true;
+            startCell = e.target;
+            clearSelection();
+            selectCell(startCell);
+        }
+
+        function rollSelection(e) {
+            if (!isSelecting) return;
+            const currentCell = e.target;
+            clearSelection();
+
+            const r1 = parseInt(startCell.dataset.row);
+            const c1 = parseInt(startCell.dataset.col);
+            const r2 = parseInt(currentCell.dataset.row);
+            const c2 = parseInt(currentCell.dataset.col);
+
+            // Calculate direction vectors
+            let dr = r2 - r1;
+            let dc = c2 - c1;
+
+            // Normalize to straight lines or diagonals (45 degrees)
+            if (dr !== 0 && dc !== 0 && Math.abs(dr) !== Math.abs(dc)) {
+                // If it's erratic tracing, stay on start item until aligned
+                selectCell(startCell);
+                return;
+            }
+
+            const steps = Math.max(Math.abs(dr), Math.abs(dc));
+            const stepR = dr === 0 ? 0 : dr / steps;
+            const stepC = dc === 0 ? 0 : dc / steps;
+
+            for (let i = 0; i <= steps; i++) {
+                const currR = r1 + (i * stepR);
+                const currC = c1 + (i * stepC);
+                const cell = document.querySelector(`[data-row="${currR}"][data-col="${currC}"]`);
+                if (cell) selectCell(cell);
+            }
+        }
+
+        function selectCell(cell) {
+            cell.classList.add('selected');
+            selectedCells.push(cell);
+        }
+
+        function clearSelection() {
+            selectedCells.forEach(cell => cell.classList.remove('selected'));
+            selectedCells = [];
+        }
+
+        function endSelection() {
+            if (!isSelecting) return;
+            isSelecting = false;
+
+            // Compile selected string
+            const selectedWord = selectedCells.map(cell => cell.innerText).join('');
+            const reversedWord = selectedWord.split('').reverse().join('');
+            const level = levels[currentLevel];
+
+            let foundMatch = null;
+            if (level.words.includes(selectedWord) && !foundWords.includes(selectedWord)) {
+                foundMatch = selectedWord;
+            } else if (level.words.includes(reversedWord) && !foundWords.includes(reversedWord)) {
+                foundMatch = reversedWord;
+            }
+
+            if (foundMatch) {
+                foundWords.push(foundMatch);
+                selectedCells.forEach(cell => cell.classList.add('found'));
+                document.getElementById(`word-${foundMatch}`).classList.add('found');
+                
+                // Check Win Condition
+                if (foundWords.length === level.words.length) {
+                    winMessage.style.display = 'block';
+                }
+            }
+
+            clearSelection();
+        }
+
+        function switchLevel(levelKey) {
+            currentLevel = levelKey;
+            document.getElementById('btn-raag').classList.toggle('active', levelKey === 'raag');
+            document.getElementById('btn-taal').classList.toggle('active', levelKey === 'taal');
+            initGame();
+        }
+
+        // Run game on startup
+        initGame();
+    </script>
+</body>
+</html>
