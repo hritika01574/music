@@ -66,7 +66,7 @@
         }
 
         input[type="text"],
-        input[type="date"] {
+        select {
             width: 100%;
             padding: 12px;
             border: 2px solid #ddd;
@@ -75,11 +75,22 @@
             box-sizing: border-box;
             transition: border-color 0.2s ease;
             outline: none;
+            background-color: white;
         }
 
         input[type="text"]:focus,
-        input[type="date"]:focus {
+        select:focus {
             border-color: var(--primary-color);
+        }
+
+        /* Responsive Row for Mobile DOB Selects */
+        .dob-selects {
+            display: flex;
+            gap: 8px;
+        }
+
+        .dob-selects select {
+            padding: 10px 6px;
         }
 
         button.login-btn {
@@ -102,7 +113,6 @@
             transform: translateY(-1px);
         }
 
-        /* Success Message Styling */
         .success-message {
             display: none;
             margin-top: 20px;
@@ -114,7 +124,6 @@
             font-size: 14px;
         }
 
-        /* Mobile Responsiveness */
         @media (max-width: 480px) {
             .login-card {
                 padding: 20px;
@@ -138,8 +147,30 @@
             </div>
 
             <div class="input-group">
-                <label for="dob">Date of Birth</label>
-                <input type="date" id="dob" name="dob" required>
+                <label>Date of Birth</label>
+                <div class="dob-selects">
+                    <select id="dob-day" required>
+                        <option value="">Day</option>
+                    </select>
+                    <select id="dob-month" required>
+                        <option value="">Month</option>
+                        <option value="01">Jan</option>
+                        <option value="02">Feb</option>
+                        <option value="03">Mar</option>
+                        <option value="04">Apr</option>
+                        <option value="05">May</option>
+                        <option value="06">Jun</option>
+                        <option value="07">Jul</option>
+                        <option value="08">Aug</option>
+                        <option value="09">Sep</option>
+                        <option value="10">Oct</option>
+                        <option value="11">Nov</option>
+                        <option value="12">Dec</option>
+                    </select>
+                    <select id="dob-year" required>
+                        <option value="">Year</option>
+                    </select>
+                </div>
             </div>
 
             <button type="submit" class="login-btn">Submit</button>
@@ -151,17 +182,34 @@
     </div>
 
     <script>
+        // Populate Days (1 to 31)
+        const daySelect = document.getElementById('dob-day');
+        for (let i = 1; i <= 31; i++) {
+            const val = i < 10 ? `0${i}` : i;
+            daySelect.innerHTML += `<option value="${val}">${i}</option>`;
+        }
+
+        // Populate Years (1940 to Current Year)
+        const yearSelect = document.getElementById('dob-year');
+        const currentYear = new Date().getFullYear();
+        for (let i = currentYear; i >= 1940; i--) {
+            yearSelect.innerHTML += `<option value="${i}">${i}</option>`;
+        }
+
+        // Form Submit Handler
         document.getElementById('login-form').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const name = document.getElementById('name').value;
-            const dob = document.getElementById('dob').value;
+            const day = document.getElementById('dob-day').value;
+            const month = document.getElementById('dob-month').value;
+            const year = document.getElementById('dob-year').value;
+            
+            const dob = `${year}-${month}-${day}`;
 
-            // Save details to LocalStorage
             localStorage.setItem('userName', name);
             localStorage.setItem('userDOB', dob);
 
-            // Show success confirmation
             document.getElementById('success-message').style.display = 'block';
         });
     </script>
