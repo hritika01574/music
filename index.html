@@ -2,58 +2,65 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Login - Indian Music App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Signup - Indian Music App</title>
     <style>
         :root {
             --primary-color: #4a148c;
             --secondary-color: #7b1fa2;
             --bg-color: #f3e5f5;
             --text-color: #333;
+            --error-color: #d32f2f;
+            --border-color: #ccc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-color);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
             color: var(--text-color);
-            margin: 0;
-            padding: 20px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            box-sizing: border-box;
+            padding: 20px;
         }
 
-        .login-card {
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        /* Responsive Card Box for Desktop & Mobile */
+        .auth-card {
+            background: #ffffff;
+            padding: 40px 35px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(74, 20, 140, 0.15);
             width: 100%;
-            max-width: 380px;
-            box-sizing: border-box;
+            max-width: 420px;
             text-align: center;
+            transition: all 0.3s ease;
         }
 
         h1 {
             color: var(--primary-color);
-            margin: 0 0 8px 0;
-            font-size: 24px;
+            margin-bottom: 6px;
+            font-size: 26px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
+            font-weight: 700;
         }
 
         p.subtitle {
             color: var(--secondary-color);
-            margin: 0 0 25px 0;
+            margin-bottom: 25px;
             font-size: 14px;
             font-weight: 500;
         }
 
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             text-align: left;
         }
 
@@ -61,156 +68,311 @@
             display: block;
             margin-bottom: 6px;
             font-size: 13px;
-            font-weight: bold;
+            font-weight: 600;
             color: var(--primary-color);
         }
 
         input[type="text"],
+        input[type="password"],
         select {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            box-sizing: border-box;
-            transition: border-color 0.2s ease;
+            padding: 12px 14px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 15px;
             outline: none;
-            background-color: white;
+            background-color: #fafafa;
+            transition: all 0.2s ease-in-out;
         }
 
-        input[type="text"]:focus,
+        input:focus,
         select:focus {
             border-color: var(--primary-color);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(74, 20, 140, 0.1);
         }
 
-        /* Responsive Row for Mobile DOB Selects */
+        /* Responsive DOB Selector Grid */
         .dob-selects {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr;
             gap: 8px;
         }
 
         .dob-selects select {
-            padding: 10px 6px;
+            padding: 12px 6px;
+            text-align: center;
         }
 
-        button.login-btn {
+        button.submit-btn {
             width: 100%;
             background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 14px 20px;
             font-size: 16px;
             cursor: pointer;
-            border-radius: 20px;
-            font-weight: bold;
+            border-radius: 25px;
+            font-weight: 700;
             transition: all 0.2s ease;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(74, 20, 140, 0.25);
             margin-top: 10px;
         }
 
-        button.login-btn:hover {
+        button.submit-btn:hover {
             background-color: var(--secondary-color);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(123, 31, 162, 0.3);
         }
 
-        .success-message {
+        button.submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .toggle-text {
+            margin-top: 22px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .toggle-btn {
+            color: var(--primary-color);
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .toggle-btn:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+
+        /* Alert Messages */
+        .message {
             display: none;
-            margin-top: 20px;
+            margin-top: 18px;
             padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 13.5px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .message.success {
             background-color: #e8f5e9;
             color: #2e7d32;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 14px;
+            border: 1px solid #c8e6c9;
         }
 
+        .message.error {
+            background-color: #ffebee;
+            color: var(--error-color);
+            border: 1px solid #ffcdd2;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Laptop / Large Screens adjustments */
+        @media (min-width: 768px) {
+            .auth-card {
+                padding: 45px 40px;
+            }
+        }
+
+        /* Mobile Screens adjustments */
         @media (max-width: 480px) {
-            .login-card {
-                padding: 20px;
+            body {
+                padding: 12px;
+            }
+            .auth-card {
+                padding: 28px 20px;
+                border-radius: 16px;
             }
             h1 {
-                font-size: 20px;
+                font-size: 22px;
+            }
+            p.subtitle {
+                font-size: 13px;
+                margin-bottom: 20px;
             }
         }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
-        <h1>Welcome</h1>
-        <p class="subtitle">Please enter your details to continue</p>
+    <div class="auth-card">
+        
+        <!-- ================= LOGIN SECTION ================= -->
+        <div id="login-section">
+            <h1>Login</h1>
+            <p class="subtitle">Enter your credentials to continue</p>
 
-        <form id="login-form">
-            <div class="input-group">
-                <label for="name">Full Name</label>
-                <input type="text" id="name" name="name" placeholder="Enter your name" required>
-            </div>
-
-            <div class="input-group">
-                <label>Date of Birth</label>
-                <div class="dob-selects">
-                    <select id="dob-day" required>
-                        <option value="">Day</option>
-                    </select>
-                    <select id="dob-month" required>
-                        <option value="">Month</option>
-                        <option value="01">Jan</option>
-                        <option value="02">Feb</option>
-                        <option value="03">Mar</option>
-                        <option value="04">Apr</option>
-                        <option value="05">May</option>
-                        <option value="06">Jun</option>
-                        <option value="07">Jul</option>
-                        <option value="08">Aug</option>
-                        <option value="09">Sep</option>
-                        <option value="10">Oct</option>
-                        <option value="11">Nov</option>
-                        <option value="12">Dec</option>
-                    </select>
-                    <select id="dob-year" required>
-                        <option value="">Year</option>
-                    </select>
+            <form id="login-form">
+                <div class="input-group">
+                    <label for="login-name">Name</label>
+                    <input type="text" id="login-name" placeholder="Enter your name" required autocomplete="username">
                 </div>
+
+                <div class="input-group">
+                    <label for="login-pwd">Password</label>
+                    <input type="password" id="login-pwd" placeholder="Enter password" required autocomplete="current-password">
+                </div>
+
+                <button type="submit" class="submit-btn">Login</button>
+            </form>
+
+            <div class="toggle-text">
+                Don't have an account? <span class="toggle-btn" onclick="showSignup()">Sign Up</span>
             </div>
-
-            <button type="submit" class="login-btn">Submit</button>
-        </form>
-
-        <div id="success-message" class="success-message">
-            🎉 Welcome! Login successful.
         </div>
+
+        <!-- ================= SIGNUP SECTION ================= -->
+        <div id="signup-section" class="hidden">
+            <h1>Sign Up</h1>
+            <p class="subtitle">Create a new account</p>
+
+            <form id="signup-form">
+                <div class="input-group">
+                    <label for="signup-name">Name</label>
+                    <input type="text" id="signup-name" placeholder="Enter your name" required autocomplete="username">
+                </div>
+
+                <div class="input-group">
+                    <label>Date of Birth (DOB)</label>
+                    <div class="dob-selects">
+                        <select id="dob-day" required><option value="">Day</option></select>
+                        <select id="dob-month" required>
+                            <option value="">Month</option>
+                            <option value="01">Jan</option><option value="02">Feb</option>
+                            <option value="03">Mar</option><option value="04">Apr</option>
+                            <option value="05">May</option><option value="06">Jun</option>
+                            <option value="07">Jul</option><option value="08">Aug</option>
+                            <option value="09">Sep</option><option value="10">Oct</option>
+                            <option value="11">Nov</option><option value="12">Dec</option>
+                        </select>
+                        <select id="dob-year" required><option value="">Year</option></select>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="signup-pwd">Password</label>
+                    <input type="password" id="signup-pwd" placeholder="Create password" required autocomplete="new-password">
+                </div>
+
+                <div class="input-group">
+                    <label for="signup-confirm-pwd">Confirm Password</label>
+                    <input type="password" id="signup-confirm-pwd" placeholder="Confirm password" required autocomplete="new-password">
+                </div>
+
+                <button type="submit" class="submit-btn">Sign Up</button>
+            </form>
+
+            <div class="toggle-text">
+                Already have an account? <span class="toggle-btn" onclick="showLogin()">Login</span>
+            </div>
+        </div>
+
+        <div id="msg" class="message"></div>
+
     </div>
 
     <script>
-        // Populate Days (1 to 31)
+        // Populate DOB Dropdowns (Days: 1-31, Years: Current down to 1940)
         const daySelect = document.getElementById('dob-day');
         for (let i = 1; i <= 31; i++) {
-            const val = i < 10 ? `0${i}` : i;
+            let val = i < 10 ? `0${i}` : i;
             daySelect.innerHTML += `<option value="${val}">${i}</option>`;
         }
 
-        // Populate Years (1940 to Current Year)
         const yearSelect = document.getElementById('dob-year');
         const currentYear = new Date().getFullYear();
         for (let i = currentYear; i >= 1940; i--) {
             yearSelect.innerHTML += `<option value="${i}">${i}</option>`;
         }
 
-        // Form Submit Handler
-        document.getElementById('login-form').addEventListener('submit', function(e) {
+        // Section Toggle Logic
+        const loginSection = document.getElementById('login-section');
+        const signupSection = document.getElementById('signup-section');
+        const msgBox = document.getElementById('msg');
+
+        function showSignup() {
+            loginSection.classList.add('hidden');
+            signupSection.classList.remove('hidden');
+            hideMessage();
+        }
+
+        function showLogin() {
+            signupSection.classList.add('hidden');
+            loginSection.classList.remove('hidden');
+            hideMessage();
+        }
+
+        function showMessage(text, type) {
+            msgBox.innerText = text;
+            msgBox.className = `message ${type}`;
+            msgBox.style.display = 'block';
+        }
+
+        function hideMessage() {
+            msgBox.style.display = 'none';
+        }
+
+        // Handle Signup Form Logic
+        document.getElementById('signup-form').addEventListener('submit', function(e) {
             e.preventDefault();
-            
-            const name = document.getElementById('name').value;
+
+            const name = document.getElementById('signup-name').value.trim();
+            const pwd = document.getElementById('signup-pwd').value;
+            const confirmPwd = document.getElementById('signup-confirm-pwd').value;
             const day = document.getElementById('dob-day').value;
             const month = document.getElementById('dob-month').value;
             const year = document.getElementById('dob-year').value;
-            
-            const dob = `${year}-${month}-${day}`;
 
-            localStorage.setItem('userName', name);
-            localStorage.setItem('userDOB', dob);
+            if (pwd !== confirmPwd) {
+                showMessage("❌ Passwords do not match!", "error");
+                return;
+            }
 
-            document.getElementById('success-message').style.display = 'block';
+            // Save user details to LocalStorage
+            const userData = { name, pwd, dob: `${year}-${month}-${day}` };
+            localStorage.setItem(`user_${name.toLowerCase()}`, JSON.stringify(userData));
+
+            showMessage("🎉 Account created successfully! Switch to Login.", "success");
+            setTimeout(() => {
+                showLogin();
+                document.getElementById('login-name').value = name;
+            }, 1500);
+        });
+
+        // Handle Login Form Logic
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('login-name').value.trim();
+            const pwd = document.getElementById('login-pwd').value;
+
+            const savedUser = localStorage.getItem(`user_${name.toLowerCase()}`);
+
+            if (!savedUser) {
+                showMessage("❌ Account not found! Please Sign Up.", "error");
+                return;
+            }
+
+            const parsedUser = JSON.parse(savedUser);
+
+            if (parsedUser.pwd === pwd) {
+                showMessage(`🎉 Welcome back, ${name}! Login successful.`, "success");
+            } else {
+                showMessage("❌ Incorrect Password!", "error");
+            }
         });
     </script>
 </body>
