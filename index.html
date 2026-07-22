@@ -369,8 +369,12 @@
             const parsedUser = JSON.parse(savedUser);
 
             if (parsedUser.pwd === pwd) {
-                showMessage(`🎉 Welcome back, ${name}! Login successful.`, "success");
-            } else {
+            localStorage.setItem('currentLoggedInUser', name);
+            showMessage(`🎉 Welcome back, ${name}! Redirecting...`, "success");
+            setTimeout(() => {
+            window.location.href = 'home.html';
+            }, 1000);
+            }else {
                 showMessage("❌ Incorrect Password!", "error");
             }
         });
