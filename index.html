@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Login - Indian Music Word Search</title>
+    <title>Login - Indian Music App</title>
     <style>
         :root {
             --primary-color: #4a148c;
@@ -102,6 +102,18 @@
             transform: translateY(-1px);
         }
 
+        /* Success Message Styling */
+        .success-message {
+            display: none;
+            margin-top: 20px;
+            padding: 12px;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
         /* Mobile Responsiveness */
         @media (max-width: 480px) {
             .login-card {
@@ -117,7 +129,7 @@
 
     <div class="login-card">
         <h1>Welcome</h1>
-        <p class="subtitle">Enter your details to play</p>
+        <p class="subtitle">Please enter your details to continue</p>
 
         <form id="login-form">
             <div class="input-group">
@@ -130,8 +142,12 @@
                 <input type="date" id="dob" name="dob" required>
             </div>
 
-            <button type="submit" class="login-btn">Start Playing</button>
+            <button type="submit" class="login-btn">Submit</button>
         </form>
+
+        <div id="success-message" class="success-message">
+            🎉 Welcome! Login successful.
+        </div>
     </div>
 
     <script>
@@ -141,11 +157,12 @@
             const name = document.getElementById('name').value;
             const dob = document.getElementById('dob').value;
 
-            // Optional: Save name to LocalStorage so you can welcome them on index.html
+            // Save details to LocalStorage
             localStorage.setItem('userName', name);
+            localStorage.setItem('userDOB', dob);
 
-            // Redirect to the main game file
-            window.location.href = 'index.html';
+            // Show success confirmation
+            document.getElementById('success-message').style.display = 'block';
         });
     </script>
 </body>
