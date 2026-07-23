@@ -55,6 +55,11 @@
             cursor: pointer;
         }
 
+        .back-btn:hover {
+            text-decoration: underline;
+            color: var(--primary-color);
+        }
+
         /* Category Tabs (Raag / Taal) */
         .category-tabs {
             display: flex;
@@ -87,7 +92,7 @@
             background-color: #e8f5e9;
             color: var(--accent-green);
             border: 1px solid var(--accent-green);
-            padding: 5px 12px;
+            padding: 6px 14px;
             border-radius: 15px;
             font-size: 13px;
             font-weight: bold;
@@ -95,7 +100,7 @@
         }
 
         .completion-badge.hidden {
-            display: none;
+            display: none !important;
         }
 
         /* Grid Layout */
@@ -105,6 +110,7 @@
             gap: 3px;
             margin: 15px 0;
             user-select: none;
+            -webkit-user-select: none;
         }
 
         .grid-cell {
@@ -118,16 +124,18 @@
             font-size: 13px;
             border-radius: 4px;
             cursor: pointer;
+            transition: background-color 0.1s ease;
         }
 
+        /* Interactive Selection States */
         .grid-cell.selected {
-            background: #ba68c8;
-            color: white;
+            background-color: #ba68c8 !important;
+            color: white !important;
         }
 
         .grid-cell.found {
-            background: #4caf50;
-            color: white;
+            background-color: #4caf50 !important;
+            color: white !important;
         }
 
         /* Word List */
@@ -146,11 +154,12 @@
             font-size: 13px;
             font-weight: 600;
             color: var(--primary-color);
+            transition: all 0.2s ease;
         }
 
         .word-item.found {
             text-decoration: line-through;
-            opacity: 0.5;
+            opacity: 0.6;
             background: #e8f5e9;
             color: var(--accent-green);
         }
@@ -164,10 +173,17 @@
             border-radius: 10px;
             font-weight: bold;
             cursor: pointer;
+            transition: background 0.2s;
         }
 
         .action-btn:hover {
             background-color: var(--primary-color);
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 15px; }
+            .grid-cell { font-size: 10px; }
+            .word-item { font-size: 11px; padding: 4px 8px; }
         }
     </style>
 </head>
@@ -175,11 +191,11 @@
 
     <div class="container">
         <div class="header-nav">
-            <button class="back-btn" onclick="goBack()">⬅ Back</button>
+            <button class="back-btn" onclick="goBack()">⬅ Back to Quizzes</button>
             <span id="level-indicator" style="font-size: 12px; font-weight: bold; color: #666;"></span>
         </div>
 
-        <h1 id="puzzle-title">Word Search</h1>
+        <h1 id="puzzle-title" style="font-size: 20px; color: var(--primary-color); margin-bottom: 5px;">Word Search</h1>
         
         <!-- Category Option Tabs -->
         <div class="category-tabs">
@@ -202,7 +218,7 @@
     </div>
 
     <script>
-        // 1. Data Store for Puzzles (Level + Category)
+        // 1. Puzzle Data Store
         const puzzleData = {
             '2': { // Level 2 (Praveshika Pratham)
                 'raag': {
@@ -250,10 +266,14 @@
             }
         };
 
-        // Get Current Level from URL or localStorage (Defaults to Level 2)
+        // State tracking
         const urlParams = new URLSearchParams(window.location.search);
         const currentLevel = urlParams.get('level') || localStorage.getItem('activeLevel') || '2';
         let currentCategory = 'raag';
+        
+        let isSelecting = false;
+        let selectedCells = [];
+        let foundWords = new Set();
 
         document.getElementById('level-indicator').innerText = `Level ${currentLevel}`;
 
@@ -263,8 +283,10 @@
             if (!data) return;
 
             document.getElementById('puzzle-title').innerText = data.title;
-            
-            // Check Completion Status in LocalStorage
+            foundWords.clear();
+            selectedCells = [];
+
+            // Check LocalStorage status
             const completionKey = `completed_L${currentLevel}_${currentCategory}`;
             const isCompleted = localStorage.getItem(completionKey) === 'true';
 
@@ -285,20 +307,103 @@
                     cell.innerText = letter;
                     cell.dataset.row = r;
                     cell.dataset.col = c;
+
+                    // Mouse & Touch Drag Selection Handlers
+                    cell.addEventListener('mousedown', () => startSelection(cell));
+                    cell.addEventListener('mouseenter', () => updateSelection(cell));
+                    cell.addEventListener('mouseup', endSelection);
+
                     gridEl.appendChild(cell);
                 });
             });
 
-            // Render Words
+            // Global Mouse Up Listener
+            window.addEventListener('mouseup', endSelection);
+
+            // Render Target Words
             const wordListEl = document.getElementById('word-list');
             wordListEl.innerHTML = '';
             data.words.forEach(word => {
                 const item = document.createElement('div');
                 item.className = 'word-item';
                 item.innerText = word;
-                item.id = `word-${word.replace(/\s+/g, '')}`;
+                item.id = `word-${cleanWord(word)}`;
                 wordListEl.appendChild(item);
             });
+        }
+
+        // Clean word helper (strips spaces to compare "KHAMA AJ")
+        function cleanWord(str) {
+            return str.replace(/\s+/g, '').toUpperCase();
+        }
+
+        // Selection Handlers
+        function startSelection(cell) {
+            isSelecting = true;
+            clearSelection();
+            toggleCell(cell, true);
+        }
+
+        function updateSelection(cell) {
+            if (!isSelecting) return;
+            toggleCell(cell, true);
+        }
+
+        function toggleCell(cell, select) {
+            if (cell.classList.contains('found')) return;
+
+            if (select) {
+                if (!selectedCells.includes(cell)) {
+                    selectedCells.push(cell);
+                    cell.classList.add('selected');
+                }
+            }
+        }
+
+        function clearSelection() {
+            selectedCells.forEach(cell => {
+                if (!cell.classList.contains('found')) {
+                    cell.classList.remove('selected');
+                }
+            });
+            selectedCells = [];
+        }
+
+        function endSelection() {
+            if (!isSelecting) return;
+            isSelecting = false;
+
+            const currentData = puzzleData[currentLevel]?.[currentCategory];
+            if (!currentData) return;
+
+            const formedWord = selectedCells.map(c => c.innerText).join('');
+            const reversedWord = formedWord.split('').reverse().join('');
+
+            const matchedWord = currentData.words.find(w => {
+                const cleaned = cleanWord(w);
+                return cleaned === formedWord || cleaned === reversedWord;
+            });
+
+            if (matchedWord && !foundWords.has(matchedWord)) {
+                // Highlight cells green permanently
+                selectedCells.forEach(c => {
+                    c.classList.remove('selected');
+                    c.classList.add('found');
+                });
+
+                // Cross out word from bottom list
+                const wordEl = document.getElementById(`word-${cleanWord(matchedWord)}`);
+                if (wordEl) wordEl.classList.add('found');
+
+                foundWords.add(matchedWord);
+
+                // Auto-mark as complete if all words are found
+                if (foundWords.size === currentData.words.length) {
+                    markAsComplete();
+                }
+            } else {
+                clearSelection();
+            }
         }
 
         // Switch Tabs (Raag vs Taal)
@@ -309,14 +414,14 @@
             loadPuzzle();
         }
 
-        // Mark completed and offer reattempt
+        // Save progress to LocalStorage
         function markAsComplete() {
             const completionKey = `completed_L${currentLevel}_${currentCategory}`;
             localStorage.setItem(completionKey, 'true');
-            loadPuzzle();
+            document.getElementById('completion-status').classList.remove('hidden');
         }
 
-        // Reset/Reattempt
+        // Reattempt logic
         function resetCurrentPuzzle() {
             loadPuzzle();
         }
@@ -325,7 +430,7 @@
             window.location.href = 'home.html';
         }
 
-        // Initial Load
+        // Load initially
         loadPuzzle();
     </script>
 </body>
